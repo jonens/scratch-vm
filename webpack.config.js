@@ -24,6 +24,21 @@ const nodeBuilder = new ScratchWebpackConfigBuilder(common)
     .addModuleRule({
         test: /\.mp3$/,
         type: 'asset'
+    })
+    .addModuleRule({
+      test: /\.ts$/,
+      use: 'ts-loader',
+      resolve: {
+        extensions: ['.tsx', '.ts', '.js'],
+      }
+    })
+    .addModuleRule({
+      test: /\.scss$/,
+      use: [
+        'style-loader',
+        'css-loader',
+        'sass-loader',
+      ],
     });
 
 const webBuilder = new ScratchWebpackConfigBuilder(common)
