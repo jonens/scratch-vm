@@ -10,8 +10,8 @@ class Scratch3toneSynth {
     this.runtime = runtime;
     let AudioContext = window.AudioContext || window.webkitAudioContext;
     let context = new AudioContext();
-    this.synth = new Tone.Synth();
-    this.polySynth = new Tone.PolySynth(this.synth).toDestination();
+    this.synth = new Tone.Synth().toDestination();
+    //this.polySynth = new Tone.PolySynth(this.synth);
   }
 
   getInfo () {
@@ -28,9 +28,9 @@ class Scratch3toneSynth {
               type: ArgumentType.STRING,
               defaultValue: "C4"
             },
-            NOTE_TYPE: {
-              type: ArgumentType.STRING,
-              defaultValue: "8n"
+            DURATION: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 1.0
             },
           }
         },
@@ -124,13 +124,13 @@ class Scratch3toneSynth {
 
   playNote (args) {
     const note = args.NOTE;
-    const note_type = args.NOTE_TYPE;
+    const duration = args.DURATION;
     //const synth = new Tone.Synth().toDestination();
-    this.polySynth.triggerAttackRelease(note, "2n");
+    this.synth.triggerAttackRelease(note, duration);
   }
   changeWaveForm (args) {
     const wave = args.WAVE;
-    this.synth.set({type: wave});
+    this.synth.oscillator.type = wave;
   }
   playNoise (args) {
     // initialize the noise and start
