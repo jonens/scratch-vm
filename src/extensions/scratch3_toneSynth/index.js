@@ -22,7 +22,7 @@ class Scratch3toneSynth {
         {
           opcode: 'playNote',
           blockType: BlockType.COMMAND,
-          text: 'Play Note: [NOTE] type: [NOTE_TYPE]',
+          text: 'Play Note: [NOTE] type: [DURATION]',
           arguments: {
             NOTE: {
               type: ArgumentType.STRING,
