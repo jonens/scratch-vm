@@ -53,7 +53,7 @@ class Scratch3SensingBlocks {
      */
     getPrimitives () {
         return {
-            sensing_touchingobject: this.touchingObject,
+            sensing_1: this.touchingObject,
             sensing_touchingcolor: this.touchingColor,
             sensing_coloristouchingcolor: this.colorTouchingColor,
             sensing_distanceto: this.distanceTo,

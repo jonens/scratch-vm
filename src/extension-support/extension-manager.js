@@ -25,7 +25,7 @@ const builtinExtensions = {
     boost: () => require('../extensions/scratch3_boost'),
     gdxfor: () => require('../extensions/scratch3_gdx_for'),
     toneSynth: () => require('../extensions/scratch3_toneSynth'),
-    myExtension: () => require('../extensions/scratch3_my_extension')
+    midi: () => require('../extensions/scratch3_midi')
 };
 
 /**
