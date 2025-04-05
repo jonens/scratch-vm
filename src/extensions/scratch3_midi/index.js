@@ -154,13 +154,6 @@ class Scratch3Midi {
                   }
                 },
               },
-              /*
-              {
-                opcode: 'addMidiListener',
-                blockType: BlockType.COMMAND,
-                text: 'Add MIDI listener'
-              },
-              */
               {
                 opcode: 'isMidiCCEvent',
                 blockType: BlockType.HAT,
@@ -171,69 +164,21 @@ class Scratch3Midi {
                 blockType: BlockType.HAT,
                 text: 'When MIDI Note On',
               },
-              /*
-              {
-                opcode: 'isMidiNotesOn',
-                blockType: BlockType.HAT,
-                text: 'When MIDI Notes On',
-              },
-              */
               {
                 opcode: 'isMidiNoteOff',
                 blockType: BlockType.HAT,
                 text: 'When Midi Note Off',
               },
-              /*
-              {
-                opcode: 'isMidiNotesOff',
-                blockType: BlockType.HAT,
-                text: 'When Midi Notes Off',
-              },
-              {
-                opcode: 'allMidiNotesOff',
-                blockType: BlockType.HAT,
-                text: 'All Midi Notes Off',
-              },
-              {
-                opcode: 'getMidiNotesOn',
-                blockType: BlockType.REPORTER,
-                text: 'MIDI Notes On',
-              },
-              {
-                opcode: 'getMidiNotesOnLength',
-                blockType: BlockType.REPORTER,
-                text: 'MIDI Notes On Length',
-              },
-              */
               {
                 opcode: 'getMidiNoteOn',
                 blockType: BlockType.REPORTER,
                 text: 'MIDI Note On',
               },
-              /*
-              {
-                opcode: 'getMidiNotesOff',
-                blockType: BlockType.REPORTER,
-                text: 'MIDI Notes Off',
-              },
-              {
-                opcode: 'getMidiNotesOffLength',
-                blockType: BlockType.REPORTER,
-                text: 'MIDI Notes Off Length',
-              },
-              */
               {
                 opcode: 'getMidiNoteOff',
                 blockType: BlockType.REPORTER,
                 text: 'MIDI Note Off',
               },
-              /*
-              {
-                opcode: 'isMidiControlChange',
-                blockType: BlockType.HAT,
-                text: 'Midi CC',
-              },
-              */
               {
                 opcode: 'getMidiControlChangeNumber',
                 blockType: BlockType.REPORTER,
@@ -249,6 +194,7 @@ class Scratch3Midi {
                 blockType: BlockType.REPORTER,
                 text: 'CC Name',
               },
+              /*
               {
                 opcode: 'getMidiCCDataAsNormal',
                 blockType: BlockType.REPORTER,
@@ -279,16 +225,15 @@ class Scratch3Midi {
                 blockType: BlockType.REPORTER,
                 text: 'CC Freq: (0-4000)',
               },
-              /*
               {
-                opcode: 'clearMidiNotesOn',
-                blockType: BlockType.COMMAND,
-                text: 'Clear MIDI Notes On',
+                opcode: 'getMidiCCDataAsDetune',
+                blockType: BlockType.REPORTER,
+                text: 'CC Detune: (-100-100)',
               },
               {
-                opcode: 'clearMidiNotesOff',
-                blockType: BlockType.COMMAND,
-                text: 'Clear MIDI Notes Off',
+                opcode: 'getMidiCCDataAsHarmonicity',
+                blockType: BlockType.REPORTER,
+                text: 'CC Harmonicity: (0-2)',
               },
               */
             ],
@@ -487,6 +432,16 @@ class Scratch3Midi {
 
     getMidiCCDataAsFrequency () {
       return (this.midiControlChange.data * 31.25).toFixed(2);
+    }
+
+    getMidiCCDataAsDetune () {
+      var detune = (this.midiControlChange.data * 1.5748).toFixed(2) - 100;
+      if (detune < 0 && detune > -1) detune = 0.0;
+      return detune;
+    }
+
+    getMidiCCDataAsHarmonicity () {
+      return (this.midiControlChange.data / 127.0).toFixed(2) * 2.0;
     }
 
     _getMidiInputs () {
