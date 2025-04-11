@@ -186,7 +186,7 @@ class Scratch3ToneSynth {
               menu: 'effectMenu'
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'connectToOutput',
@@ -198,7 +198,7 @@ class Scratch3ToneSynth {
               menu: 'outputNodeMenu'
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'connectLfoToSignal',
@@ -210,7 +210,7 @@ class Scratch3ToneSynth {
               menu: 'lfoToSignalMenu'
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
 
         {
@@ -223,7 +223,7 @@ class Scratch3ToneSynth {
               menu: 'disconnectNodeMenu'
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'playNote',
@@ -243,7 +243,7 @@ class Scratch3ToneSynth {
               defaultValue: 1.0
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'startSourceNote',
@@ -259,7 +259,7 @@ class Scratch3ToneSynth {
               defaultValue: 60
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'startSourceSound',
@@ -271,7 +271,7 @@ class Scratch3ToneSynth {
               menu: 'sourceTypeMenu'
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'stopSourceSound',
@@ -283,7 +283,7 @@ class Scratch3ToneSynth {
               menu: 'sourceTypeMenu'
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'stopAllSounds',
@@ -300,7 +300,7 @@ class Scratch3ToneSynth {
               menu: 'volumeMenu',
             }
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'changeWaveForm',
@@ -316,7 +316,7 @@ class Scratch3ToneSynth {
               menu: 'waveFormSourceMenu'
             }
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setNormalRangeEffect',
@@ -336,7 +336,7 @@ class Scratch3ToneSynth {
               menu: 'normalEffectValueMenu',
             }
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setLfoRangeEffect',
@@ -356,7 +356,7 @@ class Scratch3ToneSynth {
               menu: 'lfoFreqMenu',
             }
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setLfoMin',
@@ -368,7 +368,7 @@ class Scratch3ToneSynth {
               defaultValue: 50
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setLfoMax',
@@ -380,7 +380,7 @@ class Scratch3ToneSynth {
               defaultValue: 700
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setHarmonicity',
@@ -396,7 +396,7 @@ class Scratch3ToneSynth {
               menu: 'harmonicityMenu',
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setDetune',
@@ -412,7 +412,7 @@ class Scratch3ToneSynth {
               defaultValue: 0,
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setDelayTime',
@@ -428,7 +428,7 @@ class Scratch3ToneSynth {
               menu: 'delayTimeMenu'
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setPitchShiftInterval',
@@ -440,7 +440,7 @@ class Scratch3ToneSynth {
               defaultValue: 0,
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setPWMModFrequency',
@@ -452,7 +452,7 @@ class Scratch3ToneSynth {
               defaultValue: 0,
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setFilter',
@@ -472,7 +472,7 @@ class Scratch3ToneSynth {
               menu: 'qValuesMenu',
             },
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'glide',
@@ -496,7 +496,7 @@ class Scratch3ToneSynth {
               defaultValue: 2
             }
           },
-          filter: [TargetType.SPRITE]
+          //filter: [TargetType.SPRITE]
         },
       ],
       menus: {
