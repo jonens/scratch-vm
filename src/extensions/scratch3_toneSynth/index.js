@@ -45,7 +45,7 @@ const NORMAL_EFFECT_DELAY_TIME = 'delay time';
 const NORMAL_EFFECT_MOD_FREQUENCY = 'modFrequency';
 const LFO_EFFECT_FREQ = 'lfoFrequency';
 const LFO_EFFECT_Q = 'lfoQ';
-const COMPONENT_TYPE_AMPLITUDE_ENVELOPE = 'amplitudeEnvelope';
+const COMPONENT_TYPE_AMPLITUDE_ENVELOPE = 'ADSR Envelope';
 const COMPONENT_TYPE_FILTER = 'filter';
 const MIN_VOLUME = -25;
 const MAX_VOLUME = 25;
@@ -186,7 +186,17 @@ class Scratch3ToneSynth {
               menu: 'effectMenu'
             },
           },
-          //filter: [TargetType.SPRITE]
+        },
+        {
+          opcode: 'connectNodeToADSR',
+          blockType: BlockType.COMMAND,
+          text: '[SOURCE_NODE] to Envelope',
+          arguments: {
+            SOURCE_NODE: {
+              type: ArgumentType.STRING,
+              menu: 'nodeToADSRMenu'
+            },
+          },
         },
         {
           opcode: 'connectToOutput',
@@ -198,7 +208,6 @@ class Scratch3ToneSynth {
               menu: 'outputNodeMenu'
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'connectLfoToSignal',
@@ -243,7 +252,6 @@ class Scratch3ToneSynth {
               defaultValue: 1.0
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'startSourceNote',
@@ -259,7 +267,6 @@ class Scratch3ToneSynth {
               defaultValue: 60
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'startSourceSound',
@@ -271,7 +278,17 @@ class Scratch3ToneSynth {
               menu: 'sourceTypeMenu'
             },
           },
-          //filter: [TargetType.SPRITE]
+        },
+        {
+          opcode: 'triggerEnvelope',
+          blockType: BlockType.COMMAND,
+          text: 'Trigger Envelope: [DURATION]',
+          arguments: {
+            DURATION: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 0.5
+            },
+          },
         },
         {
           opcode: 'stopSourceSound',
@@ -283,7 +300,6 @@ class Scratch3ToneSynth {
               menu: 'sourceTypeMenu'
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'stopAllSounds',
@@ -300,7 +316,6 @@ class Scratch3ToneSynth {
               menu: 'volumeMenu',
             }
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'changeWaveForm',
@@ -316,7 +331,6 @@ class Scratch3ToneSynth {
               menu: 'waveFormSourceMenu'
             }
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setNormalRangeEffect',
@@ -336,7 +350,6 @@ class Scratch3ToneSynth {
               menu: 'normalEffectValueMenu',
             }
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setLfoRangeEffect',
@@ -356,7 +369,6 @@ class Scratch3ToneSynth {
               menu: 'lfoFreqMenu',
             }
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setLfoMin',
@@ -368,7 +380,6 @@ class Scratch3ToneSynth {
               defaultValue: 50
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setLfoMax',
@@ -380,7 +391,6 @@ class Scratch3ToneSynth {
               defaultValue: 700
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setHarmonicity',
@@ -396,7 +406,6 @@ class Scratch3ToneSynth {
               menu: 'harmonicityMenu',
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setDetune',
@@ -412,7 +421,6 @@ class Scratch3ToneSynth {
               defaultValue: 0,
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setDelayTime',
@@ -428,7 +436,6 @@ class Scratch3ToneSynth {
               menu: 'delayTimeMenu'
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setPitchShiftInterval',
@@ -440,7 +447,6 @@ class Scratch3ToneSynth {
               defaultValue: 0,
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setPWMModFrequency',
@@ -452,7 +458,6 @@ class Scratch3ToneSynth {
               defaultValue: 0,
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'setFilter',
@@ -472,7 +477,6 @@ class Scratch3ToneSynth {
               menu: 'qValuesMenu',
             },
           },
-          //filter: [TargetType.SPRITE]
         },
         {
           opcode: 'glide',
@@ -496,13 +500,13 @@ class Scratch3ToneSynth {
               defaultValue: 2
             }
           },
-          //filter: [TargetType.SPRITE]
         },
       ],
       menus: {
         outputNodeMenu:  'getOutputNodeMenuItems',
         disconnectNodeMenu:  'getDisconnectNodeMenuItems',
         nodeToEffectMenu: 'getNodeToEffectMenuItems',
+        nodeToADSRMenu: 'getNodeToADSRMenuItems',
         lfoToSignalMenu: 'getLFOSignalMenuItems',
         soundMenu: 'getScratchSoundMenuItems',
         noteSourceTypeMenu: 'getNoteSourceMenuItems',
@@ -578,7 +582,6 @@ class Scratch3ToneSynth {
           items: [
             OSCILLATOR_TYPE_LFO,
             EFFECT_TYPE_AUTOFILTER,
-            //EFFECT_TYPE_AUTOWAH,
             EFFECT_TYPE_CHORUS,
             EFFECT_TYPE_PHASER,
             EFFECT_TYPE_TREMOLO,
@@ -630,8 +633,6 @@ class Scratch3ToneSynth {
         wetEffectParameterMenu: {
           items: [
             EFFECT_TYPE_AUTOFILTER,
-            //EFFECT_TYPE_BITCRUSHER,
-            //EFFECT_TYPE_CHEBYSHEV,
             EFFECT_TYPE_CHORUS,
             EFFECT_TYPE_DISTORTION,
             EFFECT_TYPE_FEEDBACKDELAY,
@@ -677,6 +678,7 @@ class Scratch3ToneSynth {
       let effect = effects[i];
       outputs.push(effect);
     }
+    outputs.push(COMPONENT_TYPE_AMPLITUDE_ENVELOPE);
     return outputs;
   }
 
@@ -692,6 +694,21 @@ class Scratch3ToneSynth {
     for (let i = 0; i < sources.length; i++) {
       let source = sources[i];
       nodes.push(source);
+    }
+    return nodes;
+  }
+
+  getNodeToADSRMenuItems () {
+    let nodes = [];
+    let sources = this.getSourceMenuItems();
+    for (let i = 0; i < sources.length; i++) {
+      let source = sources[i];
+      nodes.push(source);
+    }
+    let effects = this.getEffectMenuItems();
+    for (let i = 0; i < effects.length; i++) {
+      let effect = effects[i];
+      nodes.push(effect);
     }
     return nodes;
   }
@@ -816,10 +833,12 @@ class Scratch3ToneSynth {
         value: COMPONENT_TYPE_FILTER,
         text: 'Filter'
       },
+      /*
       {
         value: COMPONENT_TYPE_AMPLITUDE_ENVELOPE,
         text: 'ADSR Envelope'
       },
+      */
     ];
     return effects;
   }
@@ -893,6 +912,23 @@ class Scratch3ToneSynth {
     const effect = this._getEffect(args.EFFECT, util);
     if (source && effect) {
       source.connect(effect);
+    }
+  }
+
+  connectNodeToADSR (args, util) {
+    const synthState = this._getSynthState(util.target);
+    var node = null;
+    var adsr = null;
+    let nodeId = args.SOURCE_NODE + util.target.sprite.name;
+    let adsrId = COMPONENT_TYPE_AMPLITUDE_ENVELOPE + util.target.sprite.name;
+    if (synthState.nodeMap && synthState.nodeMap.has(nodeId)) {
+      node = synthState.nodeMap.get(nodeId);
+    }
+    if (synthState.nodeMap && synthState.nodeMap.has(adsrId)) {
+      adsr = synthState.nodeMap.get(adsrId);
+    }
+    if (node && adsr) {
+      node.connect(adsr);
     }
   }
 
@@ -1316,6 +1352,16 @@ setFilter (args, util) {
     }
   }
 
+  triggerEnvelope (args, util) {
+    const duration = Cast.toNumber(args.DURATION);
+    const synthState = this._getSynthState(util.target);
+    const envelopeId = COMPONENT_TYPE_AMPLITUDE_ENVELOPE+util.target.sprite.name;
+    if (synthState.nodeMap && synthState.nodeMap.has(envelopeId)) {
+      const adsr = synthState.nodeMap.get(envelopeId);
+      adsr.triggerAttackRelease(duration);
+    }
+  }
+
   stopSourceSound(args, util) {
     const synthState = this._getSynthState(util.target);
     switch (args.SOURCE_TYPE) {
@@ -1592,6 +1638,8 @@ setFilter (args, util) {
       case EFFECT_TYPE_REVERB:
       case EFFECT_TYPE_TREMOLO:
       case EFFECT_TYPE_VIBRATO:
+      case COMPONENT_TYPE_AMPLITUDE_ENVELOPE:
+      case COMPONENT_TYPE_FILTER:
       return this._createEffect(nodeType, util);
         break;
       default:
