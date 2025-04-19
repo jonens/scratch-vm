@@ -540,6 +540,7 @@ class Scratch3ToneSynth {
             OSCILLATOR_TYPE_FM_BASE,
             OSCILLATOR_TYPE_FM_MOD,
             OSCILLATOR_TYPE_OSC,
+            OSCILLATOR_TYPE_LFO,
           ]
         },
         oscMenu: {
@@ -1653,7 +1654,7 @@ setFilter (args, util) {
     const end_note = this._getNote(args.END_NOTE);
     const seconds = Cast.toNumber(args.SECONDS);
     const duration = "+"+seconds+"";
-    var synthState = this._getSynthState(util.target);
+    const synthState = this._getSynthState(util.target);
     const osc = this._getOscillator(args.OSC_TYPE, util);
     if (osc && osc.state != PLAYBACK_STATE_STARTED) {
       osc.set({frequency:start_note, volume: synthState.currentVolume});
@@ -1791,6 +1792,7 @@ setFilter (args, util) {
       switch (source) {
         case OSCILLATOR_TYPE_FAT:
         case OSCILLATOR_TYPE_OSC:
+        case OSCILLATOR_TYPE_LFO:
           if (synthState.nodeMap.has(sourceId) ) {
             osc = synthState.nodeMap.get(sourceId);
             osc.set({type:waveForm});
