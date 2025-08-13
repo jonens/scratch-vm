@@ -1,3 +1,4 @@
+
 const BlockType = require('../../extension-support/block-type');
 const ArgumentType = require('../../extension-support/argument-type');
 const TargetType = require('../../extension-support/target-type');
@@ -5,7 +6,8 @@ const Cast = require('../../util/cast');
 const Clone = require('../../util/clone');
 const MathUtil = require('../../util/math-util');
 const Tone = require('../../../node_modules/tone/build/esm/index.js');
-const Clock = require('../../io/clock');
+//const Tone = require('../../../node_modules/tone/build/Tone.js');
+//const Clock = require('../../io/clock');
 const NOISE_TYPE_PINK = 'pink';
 const NOISE_TYPE_WHITE = 'white';
 const NOISE_TYPE_BROWN = 'brown';
@@ -63,7 +65,7 @@ class Scratch3ToneSynth {
     this.runtime = runtime;
     this._onTargetCreated = this._onTargetCreated.bind(this);
     this.runtime.on('targetWasCreated', this._onTargetCreated);
-    this.clock = new Clock(runtime);
+    //this.clock = new Clock(runtime);
     this.fmModType = 'sine';
     this.amModType = 'sine';
     this.pwmModFreq = 0.5;
@@ -137,7 +139,6 @@ class Scratch3ToneSynth {
           adsrMap:null,
           lfo: null,
           gain: null,
-
       };
   }
 
@@ -511,6 +512,7 @@ class Scratch3ToneSynth {
             }
           },
         },
+
         {
           opcode: 'changeVolume',
           blockType: BlockType.COMMAND,
@@ -522,13 +524,13 @@ class Scratch3ToneSynth {
             }
           },
         },
+
         {
           opcode: 'getVolume',
           blockType: BlockType.REPORTER,
           text: 'volume',
         },
 
-        ///*
         {
           opcode: 'connectFFT',
           blockType: BlockType.COMMAND,
@@ -561,6 +563,7 @@ class Scratch3ToneSynth {
           blockType: BlockType.REPORTER,
           text: 'FFT size',
         },
+
         {
           opcode: 'connectWaveform',
           blockType: BlockType.COMMAND,
@@ -593,11 +596,9 @@ class Scratch3ToneSynth {
           blockType: BlockType.REPORTER,
           text: 'Waveform size',
         },
-        //*/
-
       ],
       menus: {
-        outputNodeMenu:  'getOutputNodeMenuItems',
+        //outputNodeMenu:  'getOutputNodeMenuItems',
         disconnectNodeMenu:  'getDisconnectNodeMenuItems',
         nodeToEffectMenu: 'getNodeToEffectMenuItems',
         nodeToADSRMenu: 'getNodeToADSRMenuItems',
@@ -668,8 +669,6 @@ class Scratch3ToneSynth {
              NORMAL_EFFECT_WET,
              NORMAL_EFFECT_DEPTH,
              NORMAL_EFFECT_DISTORTION,
-             //NORMAL_EFFECT_FEEDBACK,
-            // NORMAL_EFFECT_DELAY_TIME,
           ]
         },
         normalEffectValueMenu: {
@@ -791,6 +790,7 @@ class Scratch3ToneSynth {
     };
   }
 
+/*
   getOutputNodeMenuItems () {
     let outputs = [];
     let sources = this.getSourceMenuItems();
@@ -812,7 +812,7 @@ class Scratch3ToneSynth {
     nodes.push(OSCILLATOR_TYPE_LFO);
     return nodes;
   }
-
+*/
   getNodeToEffectMenuItems () {
     let nodes = [];
     let sources = this.getSourceMenuItems();
@@ -1433,6 +1433,7 @@ setFilter (args, util) {
     this._setVolume(volume, util);
   }
 
+
   getVolume (args, util) {
     const synthState = this._getSynthState(util.target);
     return synthState.currentVolume;
@@ -1764,15 +1765,15 @@ setFilter (args, util) {
   _createFFT (util) {
     const synthState = this._getSynthState(util.target);
     const fftId = COMPONENT_TYPE_FFT+util.target.sprite.name;
-    if (!synthState.nodeMap) {
-      synthState.nodeMap = new Map();
+    if (!synthState.effectMap) {
+      synthState.effectMap = new Map();
     }
-    if (synthState.nodeMap && synthState.nodeMap.has(fftId)) {
-      return synthState.nodeMap.get(fftId);
+    if (synthState.effectMap && synthState.effectMap.has(fftId)) {
+      return synthState.effectMap.get(fftId);
     }
     else {
       const fft = new Tone.FFT(COMPONENT_BIN_SIZE);
-      synthState.nodeMap.set(fftId, fft);
+      synthState.effectMap.set(fftId, fft);
       return fft;
     }
   }
@@ -1780,15 +1781,15 @@ setFilter (args, util) {
   _createWaveform (util) {
     const synthState = this._getSynthState(util.target);
     const waveformId = COMPONENT_TYPE_WAVEFORM+util.target.sprite.name;
-    if (!synthState.nodeMap) {
-      synthState.nodeMap = new Map();
+    if (!synthState.effectMap) {
+      synthState.effectMap = new Map();
     }
-    if (synthState.nodeMap && synthState.nodeMap.has(waveformId)) {
-      return synthState.nodeMap.get(waveformId);
+    if (synthState.effectMap && synthState.effectMap.has(waveformId)) {
+      return synthState.effectMap.get(waveformId);
     }
     else {
       const waveform = new Tone.Waveform(COMPONENT_BIN_SIZE);
-      synthState.nodeMap.set(waveformId, waveform);
+      synthState.effectMap.set(waveformId, waveform);
       return waveform;
     }
   }
@@ -1858,8 +1859,8 @@ setFilter (args, util) {
     let fft;
     var synthState = this._getSynthState(util.target);
     const fftId = COMPONENT_TYPE_FFT+util.target.sprite.name;
-    if (synthState && synthState.nodeMap && synthState.nodeMap.has(fftId)) {
-      fft = synthState.nodeMap.get(fftId);
+    if (synthState && synthState.effectMap && synthState.effectMap.has(fftId)) {
+      fft = synthState.effectMap.get(fftId);
     }
     else {
       fft = this._createFFT(util);
@@ -1871,8 +1872,8 @@ setFilter (args, util) {
     let waveform;
     var synthState = this._getSynthState(util.target);
     const waveformId = COMPONENT_TYPE_WAVEFORM+util.target.sprite.name;
-    if (synthState && synthState.nodeMap && synthState.nodeMap.has(waveformId)) {
-      waveform = synthState.nodeMap.get(waveformId);
+    if (synthState && synthState.effectMap && synthState.effectMap.has(waveformId)) {
+      waveform = synthState.effectMap.get(waveformId);
     }
     else {
       waveform = this._createWaveform(util);
@@ -2004,6 +2005,7 @@ setFilter (args, util) {
     const waveform = this._getWaveform(util);
     return waveform.size;
   }
+
 
   glide (args, util) {
     const start_note = this._getNote(args.START_NOTE);
