@@ -139,6 +139,7 @@ class Scratch3ToneSynth {
           adsrMap:null,
           lfo: null,
           gain: null,
+          binSize: 512
       };
   }
 
@@ -182,51 +183,6 @@ class Scratch3ToneSynth {
 
       blocks: [
         {
-          opcode: 'playNote',
-          blockType: BlockType.COMMAND,
-          text: 'play [SOURCE] note: [NOTE] for: [DURATION] seconds',
-          arguments: {
-            SOURCE: {
-              type: ArgumentType.STRING,
-              menu: 'noteSourceTypeMenu'
-            },
-            NOTE: {
-              type: ArgumentType.NOTE,
-              defaultValue: 60
-            },
-            DURATION: {
-              type: ArgumentType.NUMBER,
-              defaultValue: 1.0
-            },
-          },
-        },
-        {
-          opcode: 'startSourceNote',
-          blockType: BlockType.COMMAND,
-          text: 'start [SOURCE] note: [NOTE]',
-          arguments: {
-            SOURCE: {
-              type: ArgumentType.STRING,
-              menu: 'noteSourceTypeMenu'
-            },
-            NOTE: {
-              type: ArgumentType.NOTE,
-              defaultValue: 60
-            },
-          },
-        },
-        {
-          opcode: 'startSourceSound',
-          blockType: BlockType.COMMAND,
-          text: 'start [SOURCE]',
-          arguments: {
-            SOURCE: {
-              type: ArgumentType.STRING,
-              menu: 'sourceTypeMenu'
-            },
-          },
-        },
-        {
           opcode: 'changeWaveForm',
           blockType: BlockType.COMMAND,
           text: 'waveform [WAVE] : [SOURCE]',
@@ -241,6 +197,7 @@ class Scratch3ToneSynth {
             }
           },
         },
+
         {
           opcode: 'setDetune',
           blockType: BlockType.COMMAND,
@@ -293,14 +250,66 @@ class Scratch3ToneSynth {
             },
           },
         },
+
+        '---',
+
         {
-          opcode: 'stopSourceSound',
+          opcode: 'setAttackRelease',
           blockType: BlockType.COMMAND,
-          text: 'stop [SOURCE_TYPE]',
+          text: 'attack: [ATTACK] release: [RELEASE]',
           arguments: {
-            SOURCE_TYPE: {
+            ATTACK: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 0.1,
+            },
+            RELEASE: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 0.8,
+            }
+          },
+        },
+        {
+          opcode: 'playNote',
+          blockType: BlockType.COMMAND,
+          text: 'play [SOURCE] note: [NOTE] for: [DURATION] seconds',
+          arguments: {
+            SOURCE: {
               type: ArgumentType.STRING,
-              menu: 'stopSourceTypeMenu'
+              menu: 'noteSourceTypeMenu'
+            },
+            NOTE: {
+              type: ArgumentType.NOTE,
+              defaultValue: 60
+            },
+            DURATION: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 1.0
+            },
+          },
+        },
+        {
+          opcode: 'startSourceNote',
+          blockType: BlockType.COMMAND,
+          text: 'start [SOURCE] note: [NOTE]',
+          arguments: {
+            SOURCE: {
+              type: ArgumentType.STRING,
+              menu: 'noteSourceTypeMenu'
+            },
+            NOTE: {
+              type: ArgumentType.NOTE,
+              defaultValue: 60
+            },
+          },
+        },
+        {
+          opcode: 'startSourceSound',
+          blockType: BlockType.COMMAND,
+          text: 'start [SOURCE]',
+          arguments: {
+            SOURCE: {
+              type: ArgumentType.STRING,
+              menu: 'sourceTypeMenu'
             },
           },
         },
@@ -328,6 +337,69 @@ class Scratch3ToneSynth {
           },
         },
         {
+          opcode: 'stopSourceSound',
+          blockType: BlockType.COMMAND,
+          text: 'stop [SOURCE_TYPE]',
+          arguments: {
+            SOURCE_TYPE: {
+              type: ArgumentType.STRING,
+              menu: 'stopSourceTypeMenu'
+            },
+          },
+        },
+
+        '---',
+
+        {
+          opcode: 'connectLfoToSignal',
+          blockType: BlockType.COMMAND,
+          text: 'LFO to [SIGNAL]',
+          arguments: {
+            SIGNAL: {
+              type: ArgumentType.STRING,
+              menu: 'lfoToSignalMenu'
+            },
+          },
+        },
+        {
+          opcode: 'setLfoFrequency',
+          blockType: BlockType.COMMAND,
+          text: '[EFFECT_TYPE] frequency : [VALUE] (1-15)',
+          arguments: {
+            EFFECT_TYPE: {
+              type: ArgumentType.STRING,
+              menu: 'lfoFreqSourceMenu',
+            },
+            VALUE: {
+              type: ArgumentType.STRING,
+              menu: 'lfoFreqMenu',
+            }
+          },
+        },
+        {
+          opcode: 'setLfoMinMax',
+          blockType: BlockType.COMMAND,
+          text: 'LFO min: [MIN] max: [MAX] (0-4000)',
+          arguments: {
+            MIN: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 50
+            },
+            MAX: {
+              type: ArgumentType.NUMBER,
+              defaultValue: 700
+            },
+          },
+        },
+        {
+          opcode: 'disconnectLFO',
+          blockType: BlockType.COMMAND,
+          text: 'remove LFO',
+        },
+
+        '---',
+
+        {
           opcode: 'addEffect',
           blockType: BlockType.COMMAND,
           text: 'add [EFFECT]',
@@ -335,6 +407,17 @@ class Scratch3ToneSynth {
             EFFECT: {
               type: ArgumentType.STRING,
               menu: 'effectMenu'
+            },
+          },
+        },
+        {
+          opcode: 'removeEffect',
+          blockType: BlockType.COMMAND,
+          text: 'remove [EFFECT]',
+          arguments: {
+            EFFECT: {
+              type: ArgumentType.STRING,
+              menu: 'removeEffectMenu'
             },
           },
         },
@@ -417,89 +500,8 @@ class Scratch3ToneSynth {
             },
           },
         },
-        {
-          opcode: 'removeEffect',
-          blockType: BlockType.COMMAND,
-          text: 'remove [EFFECT]',
-          arguments: {
-            EFFECT: {
-              type: ArgumentType.STRING,
-              menu: 'removeEffectMenu'
-            },
-          },
-        },
-        {
-          opcode: 'connectLfoToSignal',
-          blockType: BlockType.COMMAND,
-          text: 'LFO to [SIGNAL]',
-          arguments: {
-            SIGNAL: {
-              type: ArgumentType.STRING,
-              menu: 'lfoToSignalMenu'
-            },
-          },
-        },
-        {
-          opcode: 'setLfoFrequency',
-          blockType: BlockType.COMMAND,
-          text: '[EFFECT_TYPE] frequency : [VALUE] (1-15)',
-          arguments: {
-            EFFECT_TYPE: {
-              type: ArgumentType.STRING,
-              menu: 'lfoFreqSourceMenu',
-            },
-            VALUE: {
-              type: ArgumentType.STRING,
-              menu: 'lfoFreqMenu',
-            }
-          },
-        },
-        {
-          opcode: 'setLfoMinMax',
-          blockType: BlockType.COMMAND,
-          text: 'LFO min: [MIN] max: [MAX] (0-4000)',
-          arguments: {
-            MIN: {
-              type: ArgumentType.NUMBER,
-              defaultValue: 50
-            },
-            MAX: {
-              type: ArgumentType.NUMBER,
-              defaultValue: 700
-            },
-          },
-        },
-        {
-          opcode: 'disconnectLFO',
-          blockType: BlockType.COMMAND,
-          text: 'disconnect LFO',
-        },
-        /*
-        {
-          opcode: 'connectNodeToADSR',
-          blockType: BlockType.COMMAND,
-          text: '[SOURCE_NODE] to Envelope',
-          arguments: {
-            SOURCE_NODE: {
-              type: ArgumentType.STRING,
-              menu: 'nodeToADSRMenu'
-            },
-          },
-        },
 
-        {
-          opcode: 'triggerEnvelope',
-          blockType: BlockType.COMMAND,
-          text: 'Trigger Envelope: [DURATION]',
-          arguments: {
-            DURATION: {
-              type: ArgumentType.NUMBER,
-              defaultValue: 0.5
-            },
-          },
-        },
-        */
-
+        '---',
 
         {
           opcode: 'setVolume',
@@ -512,7 +514,6 @@ class Scratch3ToneSynth {
             }
           },
         },
-
         {
           opcode: 'changeVolume',
           blockType: BlockType.COMMAND,
@@ -524,13 +525,25 @@ class Scratch3ToneSynth {
             }
           },
         },
-
         {
           opcode: 'getVolume',
           blockType: BlockType.REPORTER,
           text: 'volume',
         },
 
+        '---',
+
+        {
+          opcode: 'setBinSize',
+          blockType: BlockType.COMMAND,
+          text: 'FFT/Wave size: [BIN_SIZE]',
+          arguments: {
+            BIN_SIZE: {
+              type: ArgumentType.NUMBER,
+              menu: 'binSizeMenu',
+            },
+          },
+        },
         {
           opcode: 'connectFFT',
           blockType: BlockType.COMMAND,
@@ -546,6 +559,7 @@ class Scratch3ToneSynth {
           opcode: 'getFFT',
           blockType: BlockType.REPORTER,
           text: 'FFT',
+          disableMonitor: true,
         },
         {
           opcode: 'getFFTValueAtIndex',
@@ -563,7 +577,6 @@ class Scratch3ToneSynth {
           blockType: BlockType.REPORTER,
           text: 'FFT size',
         },
-
         {
           opcode: 'connectWaveform',
           blockType: BlockType.COMMAND,
@@ -579,6 +592,7 @@ class Scratch3ToneSynth {
           opcode: 'getWaveform',
           blockType: BlockType.REPORTER,
           text: 'Waveform',
+          disableMonitor: true,
         },
         {
           opcode: 'getWaveformValueAtIndex',
@@ -598,13 +612,13 @@ class Scratch3ToneSynth {
         },
       ],
       menus: {
-        //outputNodeMenu:  'getOutputNodeMenuItems',
         disconnectNodeMenu:  'getDisconnectNodeMenuItems',
         nodeToEffectMenu: 'getNodeToEffectMenuItems',
         nodeToADSRMenu: 'getNodeToADSRMenuItems',
         lfoToSignalMenu: 'getLFOSignalMenuItems',
         soundMenu: 'getScratchSoundMenuItems',
         noteSourceTypeMenu: 'getNoteSourceMenuItems',
+        binSizeMenu: 'getBinSizeMenuItems',
         sourceTypeMenu: 'getSourceMenuItems',
         pulseWidthMenu: {
           acceptReporters: true,
@@ -705,7 +719,6 @@ class Scratch3ToneSynth {
             EFFECT_TYPE_AUTOFILTER,
             EFFECT_TYPE_CHORUS,
             EFFECT_TYPE_PHASER,
-            //EFFECT_TYPE_TREMOLO,
             EFFECT_TYPE_VIBRATO
           ],
         },
@@ -762,7 +775,6 @@ class Scratch3ToneSynth {
             EFFECT_TYPE_FEEDBACKDELAY,
             EFFECT_TYPE_PINGPONGDELAY,
             EFFECT_TYPE_REVERB,
-            //EFFECT_TYPE_TREMOLO,
             EFFECT_TYPE_VIBRATO
           ]
         },
@@ -790,29 +802,6 @@ class Scratch3ToneSynth {
     };
   }
 
-/*
-  getOutputNodeMenuItems () {
-    let outputs = [];
-    let sources = this.getSourceMenuItems();
-    let effects = this.getEffectMenuItems();
-    for (let i = 0; i < sources.length; i++) {
-      let source = sources[i];
-      outputs.push(source);
-    }
-    for (let i=0; i < effects.length; i++) {
-      let effect = effects[i];
-      outputs.push(effect);
-    }
-    outputs.push(COMPONENT_TYPE_AMPLITUDE_ENVELOPE);
-    return outputs;
-  }
-
-  getDisconnectNodeMenuItems () {
-    let nodes = this.getOutputNodeMenuItems();
-    nodes.push(OSCILLATOR_TYPE_LFO);
-    return nodes;
-  }
-*/
   getNodeToEffectMenuItems () {
     let nodes = [];
     let sources = this.getSourceMenuItems();
@@ -907,6 +896,18 @@ class Scratch3ToneSynth {
     ];
   }
 
+  getBinSizeMenuItems () {
+    return [
+      '16',
+      '32',
+      '64',
+      '128',
+      '256',
+      '512',
+      '1024'
+    ];
+  }
+
   getOscillatorMenuItems () {
     return [
       OSCILLATOR_TYPE_AM,
@@ -966,10 +967,6 @@ class Scratch3ToneSynth {
         value: EFFECT_TYPE_REVERB,
         text: 'Reverb'
       },
-      // {
-      //   value: EFFECT_TYPE_TREMOLO,
-      //   text: 'Tremolo'
-      // },
       {
         value: EFFECT_TYPE_VIBRATO,
         text: 'Vibrato'
@@ -978,12 +975,10 @@ class Scratch3ToneSynth {
         value: COMPONENT_TYPE_FILTER,
         text: 'Filter'
       },
-      /*
       {
         value: COMPONENT_TYPE_AMPLITUDE_ENVELOPE,
         text: 'ADSR Envelope'
       },
-      */
     ];
     return effects;
   }
@@ -1103,25 +1098,6 @@ class Scratch3ToneSynth {
     }
   }
 
-
-/*
-  connectNodeToADSR (args, util) {
-    const synthState = this._getSynthState(util.target);
-    var node = null;
-    var adsr = null;
-    let nodeId = args.SOURCE_NODE + util.target.sprite.name;
-    let adsrId = COMPONENT_TYPE_AMPLITUDE_ENVELOPE + util.target.sprite.name;
-    if (synthState.nodeMap && synthState.nodeMap.has(nodeId)) {
-      node = synthState.nodeMap.get(nodeId);
-    }
-    if (synthState.nodeMap && synthState.nodeMap.has(adsrId)) {
-      adsr = synthState.nodeMap.get(adsrId);
-    }
-    if (node && adsr) {
-      node.connect(adsr);
-    }
-  }
-*/
   _connectToOutput (sourceNode, util) {
     console.log("connectToOutput util.target.sprite.name: " + util.target.sprite.name);
     const synthState = this._getSynthState(util.target);
@@ -1141,17 +1117,19 @@ class Scratch3ToneSynth {
     else {
       adsr = this._createADSR(util);
     }
-    if (synthState.effectMap && synthState.effectMap.size > 0 && channel) {
+    if (synthState.effectMap && synthState.effectMap.size > 0 && channel && adsr) {
       sourceNode.disconnect();
       for (const effect of synthState.effectMap.values()) {
         sourceNode.connect(effect);
-        effect.connect(channel);
+        effect.connect(adsr);
+        adsr.connect(channel);
         channel.toDestination();
       }
     }
-  else if (sourceNode && channel) {
+    else if (sourceNode && channel && adsr) {
       console.log('channel volume: ' + channel.volume.value);
-      sourceNode.connect(channel);
+      sourceNode.connect(adsr);
+      adsr.connect(channel);
       channel.toDestination();
     }
   }
@@ -1292,7 +1270,6 @@ class Scratch3ToneSynth {
           if (effect.depth) {
             switch(effectType) {
               case EFFECT_TYPE_AUTOFILTER:
-              //case EFFECT_TYPE_TREMOLO:
               case EFFECT_TYPE_VIBRATO:
                 effect.depth.value = value;
                 break;
@@ -1309,16 +1286,6 @@ class Scratch3ToneSynth {
             effect.distortion = value;
           }
           break;
-        // case 'feedback':
-        //   if (effect.feedback) {
-        //     effect.feedback.value = value;
-        //   }
-        //   break;
-        // case 'delay':
-        //   if (effect.delayTime) {
-        //     effect.delayTime.value = value;
-        //   }
-        //   break;
         default:
           break;
       }
@@ -1439,6 +1406,19 @@ setFilter (args, util) {
     return synthState.currentVolume;
   }
 
+  setAttackRelease (args, util) {
+    const synthState = this._getSynthState(util.target);
+    const adsr = this._createADSR(util);
+    var attack = Cast.toNumber(args.ATTACK);
+    var release = Cast.toNumber(args.RELEASE);
+    attack = MathUtil.clamp(attack, 0, 2);
+    release = MathUtil.clamp(release, 0, 5);
+    if (adsr) {
+      adsr.attack = attack;
+      adsr.release = release;
+    }
+  }
+
   playNote (args, util) {
     const synthState = this._getSynthState(util.target);
     const note = this._getNote(args.NOTE);
@@ -1451,10 +1431,13 @@ setFilter (args, util) {
       case OSCILLATOR_TYPE_PULSE:
       case OSCILLATOR_TYPE_PWM:
         const osc = this._getOscillator(args.SOURCE, util);
+        const adsr = this._createADSR(util);
         console.log("playbackState for " + args.SOURCE + ": " + osc.state);
-        if (osc && osc.state != PLAYBACK_STATE_STARTED) {
+        if (osc && osc.state != PLAYBACK_STATE_STARTED && adsr) {
           this._connectToOutput(osc, util);
-          osc.set({frequency: note}).start().stop("+"+duration+"");
+          const stopTime = duration + 0.5;
+          osc.set({frequency: note}).start().stop("+"+stopTime+"");
+          adsr.triggerAttackRelease(duration);
         }
         break;
       default:
@@ -1474,14 +1457,19 @@ setFilter (args, util) {
       case OSCILLATOR_TYPE_PULSE:
       case OSCILLATOR_TYPE_PWM:
         const osc = this._getOscillator(args.SOURCE, util);
+        const adsr = this._createADSR(util);
         console.log("playbackState for " + args.SOURCE + ": " + osc.state);
-        if (osc && osc.state != PLAYBACK_STATE_STARTED) {
+        if (osc && osc.state === PLAYBACK_STATE_STARTED) {
+          osc.stop();
+        }
+        if (osc && osc.state != PLAYBACK_STATE_STARTED && adsr) {
           this._connectToOutput(osc, util);
           osc.frequency.value =  note;
           console.log("note: " + note);
           console.log("osc.frequency: " + osc.frequency.value);
           console.log("osc.frequency.convert: " + osc.frequency.convert);
           osc.start();
+          adsr.triggerAttack();
         }
         break;
       default:
@@ -1492,6 +1480,7 @@ setFilter (args, util) {
   startSourceSound (args, util) {
     const synthState = this._getSynthState(util.target);
     let node = null;
+    const adsr = this._createADSR(util);
     switch (args.SOURCE) {
       case OSCILLATOR_TYPE_AM:
       case OSCILLATOR_TYPE_FAT:
@@ -1500,6 +1489,9 @@ setFilter (args, util) {
       case OSCILLATOR_TYPE_PULSE:
       case OSCILLATOR_TYPE_PWM:
         const osc = this._getOscillator(args.SOURCE, util);
+        if (osc && osc.state === PLAYBACK_STATE_STARTED) {
+          osc.stop();
+        }
         if (osc && osc.state != PLAYBACK_STATE_STARTED) {
           node = osc;
         }
@@ -1508,12 +1500,18 @@ setFilter (args, util) {
       case NOISE_TYPE_WHITE:
       case NOISE_TYPE_BROWN:
         const noise = this._getNoise(args.SOURCE, util);
+        if (noise && noise.state === PLAYBACK_STATE_STARTED) {
+          noise.stop();
+        }
         if (noise && noise.state != PLAYBACK_STATE_STARTED) {
           node = noise;
         }
         break;
       case OSCILLATOR_TYPE_LFO:
         const lfo = this._getLFO(util);
+        if (lfo && lfo.state === PLAYBACK_STATE_STARTED) {
+          lfo.stop();
+        }
         if (lfo && lfo.state != PLAYBACK_STATE_STARTED) {
           node = lfo;
         }
@@ -1521,13 +1519,17 @@ setFilter (args, util) {
       default:
         if (args.SOURCE.includes('SOUND_')) {
           const soundPlayer = this._getSoundPlayer(args.SOURCE, util);
+          if (soundPlayer && soundPlayer.state === PLAYBACK_STATE_STARTED) {
+            soundPlayer.stop();
+          }
           node = soundPlayer;
         }
         break;
     }
-    this._connectToOutput(node, util);
-    if (node && node.state != PLAYBACK_STATE_STARTED) {
+    if (node && node.state != PLAYBACK_STATE_STARTED && adsr) {
+      this._connectToOutput(node, util);
       node.start();
+      adsr.triggerAttack();
     }
   }
 
@@ -1546,19 +1548,10 @@ setFilter (args, util) {
       osc.modulationFrequency.value = freq;
     }
   }
-/*
-  triggerEnvelope (args, util) {
-    const duration = Cast.toNumber(args.DURATION);
-    const synthState = this._getSynthState(util.target);
-    const envelopeId = COMPONENT_TYPE_AMPLITUDE_ENVELOPE+util.target.sprite.name;
-    if (synthState.nodeMap && synthState.nodeMap.has(envelopeId)) {
-      const adsr = synthState.nodeMap.get(envelopeId);
-      adsr.triggerAttackRelease(duration);
-    }
-  }
-*/
+
   stopSourceSound(args, util) {
     const synthState = this._getSynthState(util.target);
+    const adsr = this._createADSR(util);
     switch (args.SOURCE_TYPE) {
       case OSCILLATOR_TYPE_AM:
       case OSCILLATOR_TYPE_FAT:
@@ -1567,16 +1560,18 @@ setFilter (args, util) {
       case OSCILLATOR_TYPE_PULSE:
       case OSCILLATOR_TYPE_PWM:
         const osc = this._getOscillator(args.SOURCE_TYPE, util);
-        if (osc) {
-          osc.stop();
+        if (osc && adsr) {
+          adsr.triggerRelease();
+          osc.disconnect();
         }
         break;
       case NOISE_TYPE_PINK:
       case NOISE_TYPE_WHITE:
       case NOISE_TYPE_BROWN:
         const noise = this._getNoise(args.SOURCE_TYPE, util);
-        if (noise) {
-          noise.stop();
+        if (noise && adsr) {
+          adsr.triggerRelease();
+          noise.disconnect();
         }
         break;
       case SOURCE_TYPE_ALL:
@@ -1585,7 +1580,10 @@ setFilter (args, util) {
       default:
         if (args.SOURCE_TYPE.includes('SOUND_')) {
           const soundPlayer = this._getSoundPlayer(args.SOURCE_TYPE, util);
-          soundPlayer.stop();
+          if (adsr) {
+            adsr.triggerRelease();
+          }
+          soundPlayer.disconnect();
         }
         break;
     }
@@ -1593,6 +1591,7 @@ setFilter (args, util) {
 
   _stopAllSounds (args, util) {
     const synthState = this._getSynthState(util.target);
+    const adsr = this._createADSR(util);
     if (synthState.sourceMap) {
       let sourceIterator = synthState.sourceMap.keys();
       for (let i = 0; i < synthState.sourceMap.size; i++) {
@@ -1601,13 +1600,15 @@ setFilter (args, util) {
         let sourceName = sourceKey.value;
         console.log("sourceName: " + sourceName);
         node = synthState.sourceMap.get(sourceKey.value);
-        if (this._nodeStartsStops(sourceName)) {
+        if (node && this._nodeStartsStops(sourceName) && adsr) {
           console.log("stopping " + sourceName);
-          node.stop();
+          adsr.triggerRelease();
+          node.disconnect();
         }
-        else if (sourceName.includes("Synth")) {
+        else if (node && sourceName.includes("Synth")) {
           console.log('stopping ' + sourceName);
           node.triggerRelease();
+          node.disconnect();
         }
       }
     }
@@ -1746,22 +1747,11 @@ setFilter (args, util) {
           synthState.effectMap.set(effectId, filter);
         }
         break;
-      case COMPONENT_TYPE_AMPLITUDE_ENVELOPE:
-        if (!synthState.effectMap.has(effectId)) {
-          const adsr = new Tone.AmplitudeEnvelope({
-              attack: 0.1,
-              decay: 0.2,
-              sustain: 1.0,
-              release: 0.8
-          });
-          synthState.effectMap.set(effectId, adsr);
-        }
-        break;
       default:
         break;
     }
   }
-///*
+
   _createFFT (util) {
     const synthState = this._getSynthState(util.target);
     const fftId = COMPONENT_TYPE_FFT+util.target.sprite.name;
@@ -1772,7 +1762,8 @@ setFilter (args, util) {
       return synthState.effectMap.get(fftId);
     }
     else {
-      const fft = new Tone.FFT(COMPONENT_BIN_SIZE);
+      //const fft = new Tone.FFT(COMPONENT_BIN_SIZE);
+      const fft = new Tone.FFT(synthState.binSize);
       synthState.effectMap.set(fftId, fft);
       return fft;
     }
@@ -1788,12 +1779,13 @@ setFilter (args, util) {
       return synthState.effectMap.get(waveformId);
     }
     else {
-      const waveform = new Tone.Waveform(COMPONENT_BIN_SIZE);
+      //const waveform = new Tone.Waveform(COMPONENT_BIN_SIZE);
+      const waveform = new Tone.Waveform(synthState.binSize);
       synthState.effectMap.set(waveformId, waveform);
       return waveform;
     }
   }
-//*/
+
   _createADSR (util) {
     const synthState = this._getSynthState(util.target);
     const adsrId = COMPONENT_TYPE_AMPLITUDE_ENVELOPE+util.target.sprite.name;
@@ -1805,32 +1797,14 @@ setFilter (args, util) {
     }
     else {
       const adsr = new Tone.AmplitudeEnvelope({
-        attack: 0.1,
+        attack: 0.01,
         decay: 0.2,
         sustain: 1.0,
-        release: 0.8});
-      synthState.adsrMap.set(adsrId, adsr);
+        release: 0.9});
+      synthState.adsrMap.set(adsrId, adsr).set("attack", 0.01).set("release",0.9);
       return adsr;
     }
   }
-
-/*
-  _createOutput (util) {
-    const synthState = this._getSynthState(util.target);
-    const gainId = COMPONENT_TYPE_GAIN+util.target.sprite.name;
-    if (!synthState.nodeMap) {
-      synthState.nodeMap = new Map();
-    }
-    if (synthState.nodeMap && synthState.nodeMap.has(gainId)) {
-      return synthState.nodeMap.get(gainId);
-    }
-    else {
-      const gain = new Tone.Gain(0);
-      synthState.nodeMap.set(gainId, gain);
-      return gain;
-    }
-  }
-*/
 
   _getSoundPlayer (soundType, util) {
     var player = null;
@@ -1854,7 +1828,7 @@ setFilter (args, util) {
     }
     return player;
   }
-///*
+
   _getFFT(util) {
     let fft;
     var synthState = this._getSynthState(util.target);
@@ -1880,7 +1854,7 @@ setFilter (args, util) {
     }
     return waveform;
   }
-//*/
+
   _createChannel (util) {
     const synthState = this._getSynthState(util.target);
     const channelId = util.target.sprite.name + '_channel';
@@ -1896,6 +1870,20 @@ setFilter (args, util) {
       channel = synthState.channelMap.get(channelId);
     }
     return channel;
+  }
+
+  setBinSize (args, util) {
+    const size = Cast.toNumber(args.BIN_SIZE);
+    const synthState = this._getSynthState(util.target);
+    const waveForm = this._getWaveform(util);
+    const fft = this._getFFT(util);
+    synthState.binSize = size;
+    if (waveForm) {
+      waveForm.size = size;
+    }
+    if (fft) {
+      fft.size = size;
+    }
   }
 
   connectFFT (args, util) {
@@ -2006,7 +1994,6 @@ setFilter (args, util) {
     return waveform.size;
   }
 
-
   glide (args, util) {
     const start_note = this._getNote(args.START_NOTE);
     const end_note = this._getNote(args.END_NOTE);
@@ -2014,7 +2001,9 @@ setFilter (args, util) {
     const duration = "+"+seconds+"";
     const synthState = this._getSynthState(util.target);
     const osc = this._getOscillator(args.OSC_TYPE, util);
-    this._connectToOutput(osc, util);
+    if (osc) {
+      this._connectToOutput(osc, util);
+    }
     if (osc && osc.state != PLAYBACK_STATE_STARTED) {
       osc.set({frequency:start_note});
       osc.start().stop(duration);
@@ -2059,12 +2048,6 @@ setFilter (args, util) {
     return COMPONENT_TYPE_GAIN;
   }
 
-/*
-  getADSR (args, util) {
-    return 'A: '+args.ATTACK+' D: '+args.DECAY + ' S: ' + args.SUSTAIN + ' R: '+args.RELEASE;
-  }
-
-*/
   _getSource (sourceType, util) {
     var source = null;
     const synthState = this._getSynthState(util.target);
@@ -2173,21 +2156,7 @@ setFilter (args, util) {
     }
     return lfo;
   }
-/*
-  _getADSR(sourceType, util) {
-    var adsr = null;
-    let adsrId = sourceType + util.target.sprite.name;
-    const synthState = this._getSynthState(util.target);
-    if (synthState.nodeMap && synthState.nodeMap.has(adsrId)) {
-      adsr = synthState.nodeMap.get(lfoId);
-    }
-    else {
-      adsr = this._createADSR(util);//new Tone.Envelope();
-    }
-    return adsr;
-  }
 
-*/
   _setNoise(noiseType, util) {
     const synthState = this._getSynthState(util.target);
     switch (noiseType) {
