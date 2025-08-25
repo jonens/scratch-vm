@@ -46,6 +46,9 @@ const NORMAL_EFFECT_DISTORTION = 'distortion';
 const NORMAL_EFFECT_FEEDBACK = 'feedback';
 const NORMAL_EFFECT_DELAY_TIME = 'delay time';
 const NORMAL_EFFECT_MOD_FREQUENCY = 'modFrequency';
+const SOUND_EFFECT_REVERSE = 'reverse';
+const SOUND_EFFECT_LOOP = 'loop';
+const SOUND_EFFECT_MUTE = 'mute';
 const LFO_EFFECT_FREQ = 'lfoFrequency';
 const LFO_EFFECT_Q = 'lfoQ';
 const COMPONENT_TYPE_AMPLITUDE_ENVELOPE = 'ADSR Envelope';
@@ -314,6 +317,17 @@ class Scratch3ToneSynth {
           },
         },
         {
+          opcode: 'getSoundLength',
+          blockType: BlockType.REPORTER,
+          text: '[SOUND_SOURCE] length (sec)',
+          arguments: {
+            SOUND_SOURCE: {
+              type: ArgumentType.STRING,
+              menu: 'soundMenu',
+            },
+          },
+        },
+        {
           opcode: 'glide',
           blockType: BlockType.COMMAND,
           text: 'Glide [OSC_TYPE] from [START_NOTE] to [END_NOTE] for [SECONDS] seconds',
@@ -440,6 +454,26 @@ class Scratch3ToneSynth {
             }
           },
         },
+        {
+          opcode: 'setSoundEffect',
+          blockType: BlockType.COMMAND,
+          text: '[SOUND_SOURCE] [EFFECT] [ON]',
+          arguments: {
+            SOUND_SOURCE: {
+              type: ArgumentType.STRING,
+              menu: 'soundMenu',
+            },
+            EFFECT: {
+              type: ArgumentType.STRING,
+              menu: 'soundEffectMenu'
+            },
+            ON: {
+              type: ArgumentType.STRING,
+              menu: 'soundEffectOnMenu',
+            }
+          },
+        },
+
         {
           opcode: 'setFeedbackDelay',
           blockType: BlockType.COMMAND,
@@ -688,6 +722,18 @@ class Scratch3ToneSynth {
         normalEffectValueMenu: {
           acceptReporters: true,
           items: 'getNormalRangeMenuValues',
+        },
+        soundEffectMenu: {
+          items: [
+            SOUND_EFFECT_REVERSE,
+            SOUND_EFFECT_MUTE,
+          ]
+        },
+        soundEffectOnMenu: {
+          items: [
+            'on',
+            'off',
+          ]
         },
         feedbackDelaySourceMenu: {
           items: [
@@ -1128,7 +1174,7 @@ class Scratch3ToneSynth {
     }
     else if (sourceNode && channel && adsr) {
       console.log('channel volume: ' + channel.volume.value);
-      sourceNode.connect(adsr);
+      sourceNode.connect(adsr).start();
       adsr.connect(channel);
       channel.toDestination();
     }
@@ -1292,6 +1338,24 @@ class Scratch3ToneSynth {
     }
   }
 
+  setSoundEffect (args, util) {
+    const soundPlayer = this._getSoundPlayer(args.SOUND_SOURCE, util);
+    const onOffState = (args.ON === 'on') ? true : false;
+    if (soundPlayer) {
+      switch (args.EFFECT) {
+        case SOUND_EFFECT_REVERSE:
+          soundPlayer.reverse = onOffState;
+          break;
+        case SOUND_EFFECT_MUTE:
+          soundPlayer.mute = onOffState;
+          break;
+        default:
+          break;
+      }
+
+    }
+  }
+
   setFeedbackDelay (args, util) {
     const source = this._getEffect(args.SOURCE, util);
     const delayTime = Cast.toNumber(args.DELAY_TIME);
@@ -1436,7 +1500,8 @@ setFilter (args, util) {
         if (osc && osc.state != PLAYBACK_STATE_STARTED && adsr) {
           this._connectToOutput(osc, util);
           const stopTime = duration + 0.5;
-          osc.set({frequency: note}).start().stop("+"+stopTime+"");
+          //osc.set({frequency: note}).start().stop("+"+stopTime+"");
+          osc.set({frequency: note}).stop("+"+stopTime+"");//.disconnect();
           adsr.triggerAttackRelease(duration);
         }
         break;
@@ -1468,7 +1533,7 @@ setFilter (args, util) {
           console.log("note: " + note);
           console.log("osc.frequency: " + osc.frequency.value);
           console.log("osc.frequency.convert: " + osc.frequency.convert);
-          osc.start();
+          //osc.start();
           adsr.triggerAttack();
         }
         break;
@@ -1522,15 +1587,26 @@ setFilter (args, util) {
           if (soundPlayer && soundPlayer.state === PLAYBACK_STATE_STARTED) {
             soundPlayer.stop();
           }
+          if (adsr) {
+            soundPlayer.fadeIn = adsr.attack;
+          }
           node = soundPlayer;
+          //node.start();
         }
         break;
     }
     if (node && node.state != PLAYBACK_STATE_STARTED && adsr) {
       this._connectToOutput(node, util);
-      node.start();
       adsr.triggerAttack();
     }
+  }
+
+  getSoundLength (args, util) {
+    const soundPlayer = this._getSoundPlayer(args.SOUND_SOURCE, util);
+    if (soundPlayer) {
+      return soundPlayer.buffer.duration;
+    }
+    return 0;
   }
 
   setPulseWidth (args, util) {
@@ -1562,7 +1638,7 @@ setFilter (args, util) {
         const osc = this._getOscillator(args.SOURCE_TYPE, util);
         if (osc && adsr) {
           adsr.triggerRelease();
-          osc.disconnect();
+          osc.stop("+"+adsr.release+"");//.disconnect();
         }
         break;
       case NOISE_TYPE_PINK:
@@ -1571,7 +1647,7 @@ setFilter (args, util) {
         const noise = this._getNoise(args.SOURCE_TYPE, util);
         if (noise && adsr) {
           adsr.triggerRelease();
-          noise.disconnect();
+          noise.stop("+"+adsr.release+"");//.disconnect();
         }
         break;
       case SOURCE_TYPE_ALL:
@@ -1581,9 +1657,11 @@ setFilter (args, util) {
         if (args.SOURCE_TYPE.includes('SOUND_')) {
           const soundPlayer = this._getSoundPlayer(args.SOURCE_TYPE, util);
           if (adsr) {
+            soundPlayer.fadeOut = adsr.release;
             adsr.triggerRelease();
+            soundPlayer.stop("+"+adsr.release+"");//.disconnect();
           }
-          soundPlayer.disconnect();
+
         }
         break;
     }
@@ -1601,14 +1679,18 @@ setFilter (args, util) {
         console.log("sourceName: " + sourceName);
         node = synthState.sourceMap.get(sourceKey.value);
         if (node && this._nodeStartsStops(sourceName) && adsr) {
+          const releaseTime = adsr.release;
           console.log("stopping " + sourceName);
+          if (sourceName.includes("SOUND_")) {
+             node.fadeOut = releaseTime;
+          }
           adsr.triggerRelease();
-          node.disconnect();
+          node.stop("+"+adsr.release+"");//.disconnect();
         }
         else if (node && sourceName.includes("Synth")) {
           console.log('stopping ' + sourceName);
           node.triggerRelease();
-          node.disconnect();
+          node.stop("+"+adsr.release+"");//.disconnect();
         }
       }
     }
@@ -1822,6 +1904,7 @@ setFilter (args, util) {
         const soundName = soundType.slice(6); //start at index 6 : SOUND_
         const sound = sprite.sounds.find((element) => element.name === soundName);
         const soundPlayer = sprite.soundBank.getSoundPlayer(sound.soundId);
+        const effects = util.runtime.audioEngine.createEffectChain();
         player = new Tone.Player(soundPlayer.buffer);
         synthState.sourceMap.set(soundId, player);
       }
@@ -2006,7 +2089,7 @@ setFilter (args, util) {
     }
     if (osc && osc.state != PLAYBACK_STATE_STARTED) {
       osc.set({frequency:start_note});
-      osc.start().stop(duration);
+      osc.start().stop(duration);//.disconnect();
       osc.frequency.exponentialRampTo(end_note, seconds);
     }
   }
