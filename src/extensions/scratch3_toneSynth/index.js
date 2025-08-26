@@ -49,6 +49,8 @@ const NORMAL_EFFECT_MOD_FREQUENCY = 'modFrequency';
 const SOUND_EFFECT_REVERSE = 'reverse';
 const SOUND_EFFECT_LOOP = 'loop';
 const SOUND_EFFECT_MUTE = 'mute';
+const ENVELOPE_ATTACK = 0.1;
+const ENVELOPE_RELEASE = 0.8;
 const LFO_EFFECT_FREQ = 'lfoFrequency';
 const LFO_EFFECT_Q = 'lfoQ';
 const COMPONENT_TYPE_AMPLITUDE_ENVELOPE = 'ADSR Envelope';
@@ -263,11 +265,11 @@ class Scratch3ToneSynth {
           arguments: {
             ATTACK: {
               type: ArgumentType.NUMBER,
-              defaultValue: 0.1,
+              defaultValue: ENVELOPE_ATTACK,
             },
             RELEASE: {
               type: ArgumentType.NUMBER,
-              defaultValue: 0.8,
+              defaultValue: ENVELOPE_RELEASE,
             }
           },
         },
@@ -1166,9 +1168,9 @@ class Scratch3ToneSynth {
     if (synthState.effectMap && synthState.effectMap.size > 0 && channel && adsr) {
       sourceNode.disconnect();
       for (const effect of synthState.effectMap.values()) {
+        sourceNode.connect(adsr).start();
         sourceNode.connect(effect);
-        effect.connect(adsr);
-        adsr.connect(channel);
+        effect.connect(channel);
         channel.toDestination();
       }
     }
@@ -1879,11 +1881,11 @@ setFilter (args, util) {
     }
     else {
       const adsr = new Tone.AmplitudeEnvelope({
-        attack: 0.01,
+        attack: ENVELOPE_ATTACK,
         decay: 0.2,
         sustain: 1.0,
-        release: 0.9});
-      synthState.adsrMap.set(adsrId, adsr).set("attack", 0.01).set("release",0.9);
+        release: ENVELOPE_RELEASE});
+      synthState.adsrMap.set(adsrId, adsr).set("attack", ENVELOPE_ATTACK).set("release",ENVELOPE_RELEASE);
       return adsr;
     }
   }
