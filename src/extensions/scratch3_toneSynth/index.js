@@ -6,10 +6,8 @@ const Cast = require('../../util/cast');
 const Clone = require('../../util/clone');
 const MathUtil = require('../../util/math-util');
 const Tone = require('../../../node_modules/tone/build/esm/index.js');
-//const Tone = require('../../../node_modules/tone/build/Tone.js');
-//const Clock = require('../../io/clock');
-const NOISE_TYPE_PINK = 'pink';
 const NOISE_TYPE_WHITE = 'white';
+const NOISE_TYPE_PINK = 'pink';
 const NOISE_TYPE_BROWN = 'brown';
 const OSCILLATOR_TYPE_AM = 'AM OSC';
 const OSCILLATOR_TYPE_FAT = 'Fat OSC';
@@ -650,7 +648,7 @@ class Scratch3ToneSynth {
       menus: {
         disconnectNodeMenu:  'getDisconnectNodeMenuItems',
         nodeToEffectMenu: 'getNodeToEffectMenuItems',
-        nodeToADSRMenu: 'getNodeToADSRMenuItems',
+        //nodeToADSRMenu: 'getNodeToADSRMenuItems',
         lfoToSignalMenu: 'getLFOSignalMenuItems',
         soundMenu: 'getScratchSoundMenuItems',
         noteSourceTypeMenu: 'getNoteSourceMenuItems',
@@ -860,20 +858,20 @@ class Scratch3ToneSynth {
     return nodes;
   }
 
-  getNodeToADSRMenuItems () {
-    let nodes = [];
-    let sources = this.getSourceMenuItems();
-    for (let i = 0; i < sources.length; i++) {
-      let source = sources[i];
-      nodes.push(source);
-    }
-    let effects = this.getEffectMenuItems();
-    for (let i = 0; i < effects.length; i++) {
-      let effect = effects[i];
-      nodes.push(effect);
-    }
-    return nodes;
-  }
+  // getNodeToADSRMenuItems () {
+  //   let nodes = [];
+  //   let sources = this.getSourceMenuItems();
+  //   for (let i = 0; i < sources.length; i++) {
+  //     let source = sources[i];
+  //     nodes.push(source);
+  //   }
+  //   let effects = this.getEffectMenuItems();
+  //   for (let i = 0; i < effects.length; i++) {
+  //     let effect = effects[i];
+  //     nodes.push(effect);
+  //   }
+  //   return nodes;
+  // }
 
   getSourceMenuItems () {
     const sources = [
@@ -1023,10 +1021,10 @@ class Scratch3ToneSynth {
         value: COMPONENT_TYPE_FILTER,
         text: 'Filter'
       },
-      {
-        value: COMPONENT_TYPE_AMPLITUDE_ENVELOPE,
-        text: 'ADSR Envelope'
-      },
+      // {
+      //   value: COMPONENT_TYPE_AMPLITUDE_ENVELOPE,
+      //   text: 'ADSR Envelope'
+      // },
     ];
     return effects;
   }
@@ -2087,7 +2085,8 @@ setFilter (args, util) {
     const synthState = this._getSynthState(util.target);
     const osc = this._getOscillator(args.OSC_TYPE, util);
     if (osc) {
-      this._connectToOutput(osc, util);
+      //this._connectToOutput(osc, util);
+      osc.toDestination();
     }
     if (osc && osc.state != PLAYBACK_STATE_STARTED) {
       osc.set({frequency:start_note});
@@ -2274,45 +2273,25 @@ setFilter (args, util) {
    * @param {object} util - utility object provided by the runtime.
    */
   _setWaveForm (waveForm, source, util) {
-    const synthState = this._getSynthState(util.target);
-    var sourceId;
-    if (source.includes('AM')) {
-      sourceId = OSCILLATOR_TYPE_AM+util.target.sprite.name;
-    }
-    else if (source.includes('FM')) {
-      sourceId = OSCILLATOR_TYPE_FM+util.target.sprite.name;
-    }
-    else {
-      sourceId = source+util.target.sprite.name;
-    }
-    if (synthState.sourceMap) {
-      var osc = null;
-      switch (source) {
-        case OSCILLATOR_TYPE_FAT:
-        case OSCILLATOR_TYPE_OSC:
-        case OSCILLATOR_TYPE_LFO:
-          if (synthState.sourceMap.has(sourceId) ) {
-            osc = synthState.sourceMap.get(sourceId);
-            osc.set({type:waveForm});
-          }
-          break;
-        case OSCILLATOR_TYPE_AM_BASE:
-        case OSCILLATOR_TYPE_FM_BASE:
-          if (synthState.sourceMap.has(sourceId) ) {
-            osc = synthState.sourceMap.get(sourceId)
-            osc.set({baseType:waveForm});
-          }
-        case OSCILLATOR_TYPE_AM_MOD:
-        case OSCILLATOR_TYPE_FM_MOD:
-          if (synthState.sourceMap.has(sourceId) ) {
-            osc = synthState.sourceMap.get(sourceId)
-            osc.set({modulationType:waveForm});
-          }
-          break;
-        default:
-          break;
+      const osc = this._getOscillator(source, util);
+      if (osc) {
+        switch (source) {
+          case OSCILLATOR_TYPE_FAT:
+          case OSCILLATOR_TYPE_OSC:
+          case OSCILLATOR_TYPE_LFO:
+              osc.set({type:waveForm});
+            break;
+          case OSCILLATOR_TYPE_AM_BASE:
+          case OSCILLATOR_TYPE_FM_BASE:
+              osc.set({baseType:waveForm});
+          case OSCILLATOR_TYPE_AM_MOD:
+          case OSCILLATOR_TYPE_FM_MOD:
+              osc.set({modulationType:waveForm});
+            break;
+          default:
+            break;
+        }
       }
-    }
   }
 
   _setVolume (volume, util) {
