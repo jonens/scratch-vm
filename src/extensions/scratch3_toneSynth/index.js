@@ -2208,6 +2208,9 @@ setFilter (args, util) {
         osc = synthState.sourceMap.get(oscId);
         osc.detune.value = 0;
       }
+      else if (oscType === OSCILLATOR_TYPE_LFO){
+        osc = this._getLFO(util);
+      }
       else {
         osc = this._createOscillator(oscType, util);
       }
