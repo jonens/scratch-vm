@@ -53,12 +53,13 @@ const LFO_EFFECT_FREQ = 'lfoFrequency';
 const LFO_EFFECT_Q = 'lfoQ';
 const COMPONENT_TYPE_AMPLITUDE_ENVELOPE = 'ADSR Envelope';
 const COMPONENT_TYPE_FILTER = 'filter';
+const COMPONENT_TYPE_USERMEDIA = 'microphone';
 const COMPONENT_TYPE_FFT = 'fft';
 const COMPONENT_TYPE_WAVEFORM = 'waveform';
 const COMPONENT_TYPE_GAIN = 'gain';
 const COMPONENT_BIN_SIZE = 512;
 const MIN_VOLUME = 0.0;
-const MAX_VOLUME = 100.0;
+const MAX_VOLUME = 200.0;
 const MAX_POLYPHONY = 30;
 const PLAYBACK_STATE_STARTED = "started";
 const PLAYBACK_STATE_STOPPED = "stopped";
@@ -136,6 +137,7 @@ class Scratch3ToneSynth {
   static get DEFAULT_SYNTH_STATE () {
       return {
           currentVolume: 100.0,
+          microphone: null,
           effectMap: null,
           sourceMap: null,
           channelMap: null,
@@ -317,6 +319,11 @@ class Scratch3ToneSynth {
           },
         },
         {
+          opcode: 'connectMicrophone',
+          blockType: BlockType.COMMAND,
+          text: 'connect mic',
+        },
+        {
           opcode: 'getSoundLength',
           blockType: BlockType.REPORTER,
           text: '[SOUND_SOURCE] length (sec)',
@@ -358,6 +365,17 @@ class Scratch3ToneSynth {
             SOURCE_TYPE: {
               type: ArgumentType.STRING,
               menu: 'stopSourceTypeMenu'
+            },
+          },
+        },
+        {
+          opcode: 'removeSource',
+          blockType: BlockType.COMMAND,
+          text: 'remove [SOURCE_TYPE]',
+          arguments: {
+            SOURCE_TYPE: {
+              type: ArgumentType.STRING,
+              menu: 'sourceTypeMenu'
             },
           },
         },
@@ -893,6 +911,10 @@ class Scratch3ToneSynth {
         value: NOISE_TYPE_BROWN,
         text: 'Brown Noise'
       },
+      {
+        value: COMPONENT_TYPE_USERMEDIA,
+        text: 'Microphone'
+      }
     ];
     let scratchSounds = this.getScratchSoundMenuItems();
     for (let i = 0; i < scratchSounds.length; i++) {
@@ -1020,11 +1042,7 @@ class Scratch3ToneSynth {
       {
         value: COMPONENT_TYPE_FILTER,
         text: 'Filter'
-      },
-      // {
-      //   value: COMPONENT_TYPE_AMPLITUDE_ENVELOPE,
-      //   text: 'ADSR Envelope'
-      // },
+      }
     ];
     return effects;
   }
@@ -1165,17 +1183,31 @@ class Scratch3ToneSynth {
     }
     if (synthState.effectMap && synthState.effectMap.size > 0 && channel && adsr) {
       sourceNode.disconnect();
-      for (const effect of synthState.effectMap.values()) {
-        sourceNode.connect(adsr).start();
-        sourceNode.connect(effect);
-        effect.connect(channel);
-        channel.toDestination();
+      if (sourceNode != synthState.microphone) {
+        for (const effect of synthState.effectMap.values()) {
+          sourceNode.connect(adsr).start();
+          sourceNode.connect(effect);
+          effect.connect(channel);
+          channel.toDestination();
+        }
+      }
+      else {
+        for (const effect of synthState.effectMap.values()) {
+          sourceNode.connect(effect);
+          effect.connect(channel);
+          channel.toDestination();
+        }
       }
     }
     else if (sourceNode && channel && adsr) {
       console.log('channel volume: ' + channel.volume.value);
-      sourceNode.connect(adsr).start();
-      adsr.connect(channel);
+      if (sourceNode != synthState.microphone) {
+        sourceNode.connect(adsr).start();
+        adsr.connect(channel);
+      }
+      else {
+        sourceNode.connect(channel);
+      }
       channel.toDestination();
     }
   }
@@ -1464,7 +1496,6 @@ setFilter (args, util) {
     this._setVolume(volume, util);
   }
 
-
   getVolume (args, util) {
     const synthState = this._getSynthState(util.target);
     return synthState.currentVolume;
@@ -1500,8 +1531,7 @@ setFilter (args, util) {
         if (osc && osc.state != PLAYBACK_STATE_STARTED && adsr) {
           this._connectToOutput(osc, util);
           const stopTime = duration + 0.5;
-          //osc.set({frequency: note}).start().stop("+"+stopTime+"");
-          osc.set({frequency: note}).stop("+"+stopTime+"");//.disconnect();
+          osc.set({frequency: note}).stop("+"+stopTime+"");
           adsr.triggerAttackRelease(duration);
         }
         break;
@@ -1581,6 +1611,21 @@ setFilter (args, util) {
           node = lfo;
         }
         break;
+      case COMPONENT_TYPE_USERMEDIA:
+        const mic = this._getMicrophone(util);
+        if (mic && mic.state === PLAYBACK_STATE_STARTED) {
+          mic.close();
+        }
+        if (mic && mic.state != PLAYBACK_STATE_STARTED) {
+          mic.open().then(() => {
+            console.log("mic open");
+            //node = mic;
+            //this._connectToOutput(node, util);
+          }).catch(e => {
+              console.log("mic not open");
+          });
+        }
+        break;
       default:
         if (args.SOURCE.includes('SOUND_')) {
           const soundPlayer = this._getSoundPlayer(args.SOURCE, util);
@@ -1591,13 +1636,20 @@ setFilter (args, util) {
             soundPlayer.fadeIn = adsr.attack;
           }
           node = soundPlayer;
-          //node.start();
         }
         break;
     }
     if (node && node.state != PLAYBACK_STATE_STARTED && adsr) {
       this._connectToOutput(node, util);
       adsr.triggerAttack();
+    }
+  }
+
+  connectMicrophone(args, util) {
+    const synthState = this._getSynthState(util.target);
+    const mic = synthState.microphone;
+    if (mic) {
+      this._connectToOutput(mic, util);
     }
   }
 
@@ -1650,6 +1702,11 @@ setFilter (args, util) {
           noise.stop("+"+adsr.release+"");//.disconnect();
         }
         break;
+      case COMPONENT_TYPE_USERMEDIA:
+        const mic = this._getMicrophone(util);
+        if (mic) {
+          mic.close();
+        }
       case SOURCE_TYPE_ALL:
         this._stopAllSounds(args, util);
         break;
@@ -1662,6 +1719,51 @@ setFilter (args, util) {
             soundPlayer.stop("+"+adsr.release+"");//.disconnect();
           }
 
+        }
+        break;
+    }
+  }
+
+  removeSource (args, util) {
+    const synthState = this._getSynthState(util.target);
+    const sourceId = args.SOURCE_TYPE + util.target.sprite.name;
+    switch (args.SOURCE_TYPE) {
+      case OSCILLATOR_TYPE_AM:
+      case OSCILLATOR_TYPE_FAT:
+      case OSCILLATOR_TYPE_FM:
+      case OSCILLATOR_TYPE_OSC:
+      case OSCILLATOR_TYPE_PULSE:
+      case OSCILLATOR_TYPE_PWM:
+        const osc = this._getOscillator(args.SOURCE_TYPE, util);
+        if (osc) {
+          synthState.sourceMap.delete(sourceId);
+          osc.stop();//.disconnect();
+          osc.dispose();
+        }
+        break;
+      case NOISE_TYPE_PINK:
+      case NOISE_TYPE_WHITE:
+      case NOISE_TYPE_BROWN:
+        const noise = this._getNoise(args.SOURCE_TYPE, util);
+        if (noise) {
+          noise.stop();//.disconnect();
+          noise.dispose();
+          synthState.sourceMap.delete(sourceId);
+        }
+        break;
+      case COMPONENT_TYPE_USERMEDIA:
+        const mic = this._getMicrophone(util);
+        if (mic) {
+          mic.close();
+          mic.dispose();
+          synthState.microphone = null;
+        }
+      default:
+        if (args.SOURCE_TYPE.includes('SOUND_')) {
+          const soundPlayer = this._getSoundPlayer(args.SOURCE_TYPE, util);
+          soundPlayer.stop();//.disconnect();
+          soundPlayer.dispose();
+          synthState.sourceMap.delete(sourceId);
         }
         break;
     }
@@ -1693,6 +1795,9 @@ setFilter (args, util) {
           node.stop("+"+adsr.release+"");//.disconnect();
         }
       }
+    }
+    if (synthState.microphone) {
+      synthState.microphone.close();
     }
   }
 
@@ -2244,6 +2349,19 @@ setFilter (args, util) {
     return lfo;
   }
 
+  _getMicrophone(util) {
+    var mic = null;
+    const synthState = this._getSynthState(util.target);
+    if (synthState.microphone) {
+      mic = synthState.microphone;
+    }
+    else {
+      mic = new Tone.UserMedia();
+      synthState.microphone = mic;
+    }
+    return mic;
+  }
+
   _setNoise(noiseType, util) {
     const synthState = this._getSynthState(util.target);
     switch (noiseType) {
@@ -2300,7 +2418,7 @@ setFilter (args, util) {
   _setVolume (volume, util) {
     const synthState = this._getSynthState(util.target);
     const channelId = util.target.sprite.name + '_channel';
-    const adjVolume = (volume * 0.2) - 14;
+    const adjVolume = (volume * 0.3) - 24;
     console.log('channelId: ' + channelId);
     console.log('adjVolume: ' + adjVolume);
     if (!synthState.channelMap || !synthState.channelMap.has(channelId)) {
