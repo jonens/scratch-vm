@@ -324,6 +324,11 @@ class Scratch3ToneSynth {
           text: 'connect mic',
         },
         {
+          opcode: 'disconnectMicrophone',
+          blockType: BlockType.COMMAND,
+          text: 'disconnect mic',
+        },
+        {
           opcode: 'getSoundLength',
           blockType: BlockType.REPORTER,
           text: '[SOUND_SOURCE] length (sec)',
@@ -1650,6 +1655,14 @@ setFilter (args, util) {
     const mic = synthState.microphone;
     if (mic) {
       this._connectToOutput(mic, util);
+    }
+  }
+
+  disconnectMicrophone(args, util) {
+    const synthState = this._getSynthState(util.target);
+    const mic = synthState.microphone;
+    if (mic) {
+      mic.disconnect();
     }
   }
 
