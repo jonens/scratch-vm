@@ -4,6 +4,9 @@ const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 const ScratchWebpackConfigBuilder = require('scratch-webpack-configuration');
 
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin");
+
+
 const common = {
     libraryName: 'scratch-vm',
     rootPath: path.resolve(__dirname)
@@ -145,5 +148,11 @@ const playgroundBuilder = webBuilder.clone()
 module.exports = [
     nodeBuilder.get(),
     webBuilder.get(),
-    playgroundBuilder.get()
+    playgroundBuilder.get(),
+    //plugins: [
+    //    new NodePolyfillPlugin()
+    //],
+    //resolve: {
+    //  fallback: { "buffer": require.resolve("buffer/") }
+    //}
 ];
