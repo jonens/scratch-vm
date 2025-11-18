@@ -762,12 +762,6 @@ class Scratch3ToneSynth {
           },
         },
         {
-          opcode: 'getFFT',
-          blockType: BlockType.REPORTER,
-          text: 'FFT',
-          disableMonitor: true,
-        },
-        {
           opcode: 'getFFTValueAtIndex',
           blockType: BlockType.REPORTER,
           text: 'FFT value at: [INDEX]',
@@ -793,12 +787,6 @@ class Scratch3ToneSynth {
               menu: 'sourceTypeMenu',
             },
           },
-        },
-        {
-          opcode: 'getWaveform',
-          blockType: BlockType.REPORTER,
-          text: 'Waveform',
-          disableMonitor: true,
         },
         {
           opcode: 'getWaveformValueAtIndex',
@@ -2388,17 +2376,6 @@ setFilter (args, util) {
     }
   }
 
-  getFFT (args, util) {
-    const fft = this._getFFT(util);
-    if (fft) {
-      console.log("source fft value: " + fft.getValue());
-      return fft.getValue();
-    }
-    else {
-      return [];
-    }
-  }
-
   getFFTValueAtIndex (args, util) {
     const index = Cast.toNumber(args.INDEX);
     const fft = this._getFFT(util);
@@ -2442,17 +2419,6 @@ setFilter (args, util) {
     }
     if (source && waveform) {
       source.connect(waveform);
-    }
-  }
-
-  getWaveform (args, util) {
-    const waveform = this._getWaveform(util);
-    if (waveform) {
-      console.log("source waveform value: " + waveform.getValue());
-      return waveform.getValue();
-    }
-    else {
-      return [];
     }
   }
 
