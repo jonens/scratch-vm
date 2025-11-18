@@ -1060,6 +1060,10 @@ class Runtime extends EventEmitter {
             return this._convertSeparatorForScratchBlocks(blockInfo);
         }
 
+        if (blockInfo.blockType === BlockType.LABEL) {
+          return this._convertLabelForScratchBlocks(blockInfo);
+        }
+
         if (blockInfo.blockType === BlockType.BUTTON) {
             return this._convertButtonForScratchBlocks(blockInfo);
         }
@@ -1230,6 +1234,21 @@ class Runtime extends EventEmitter {
             info: blockInfo,
             xml: '<sep gap="36"/>'
         };
+    }
+
+    /**
+     * Generate a label between blocks categories or sub-categories.
+     * @param {ExtensionBlockMetadata} blockInfo - the block to convert
+     * @param {CategoryInfo} categoryInfo - the category for this block
+     * @returns {ConvertedBlockInfo} - the converted & original block information
+     * @private
+     */
+
+    _convertLabelForScratchBlocks (blockInfo) {
+      return {
+          info: blockInfo,
+          xml: `<label text="${xmlEscape(blockInfo.text)}"></label>`
+      };
     }
 
     /**

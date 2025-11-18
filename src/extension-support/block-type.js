@@ -36,6 +36,11 @@ const BlockType = {
     HAT: 'hat',
 
     /**
+     * Block which separates blocks by a label
+     */
+    LABEL: 'label',
+
+    /**
      * Specialized command block which may or may not run a child branch
      * If a child branch runs, the thread evaluates the loop block again.
      */
