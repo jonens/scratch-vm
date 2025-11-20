@@ -413,6 +413,17 @@ class Scratch3ToneSynth {
           text: 'playbackRate',
         },
         {
+          opcode: 'getSoundLength',
+          blockType: BlockType.REPORTER,
+          text: '[SOUND_SOURCE] length (sec)',
+          arguments: {
+            SOUND_SOURCE: {
+              type: ArgumentType.STRING,
+              menu: 'soundMenu',
+            },
+          },
+        },
+        {
           opcode: 'changeWaveForm',
           blockType: BlockType.COMMAND,
           text: 'waveform [WAVE] : [SOURCE]',
@@ -427,7 +438,6 @@ class Scratch3ToneSynth {
             }
           },
         },
-
         {
           opcode: 'setDetune',
           blockType: BlockType.COMMAND,
@@ -488,17 +498,6 @@ class Scratch3ToneSynth {
             OSC_TYPE: {
               type: ArgumentType.STRING,
               menu: 'oscillatorFreqTypeMenu',
-            },
-          },
-        },
-        {
-          opcode: 'getSoundLength',
-          blockType: BlockType.REPORTER,
-          text: '[SOUND_SOURCE] length (sec)',
-          arguments: {
-            SOUND_SOURCE: {
-              type: ArgumentType.STRING,
-              menu: 'soundMenu',
             },
           },
         },
